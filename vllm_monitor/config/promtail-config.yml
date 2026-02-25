@@ -1,0 +1,95 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 1048576
+    timeout: 10s
+
+scrape_configs:
+  # vLLM 로그 수집
+  - job_name: vllm
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: vllm
+          host: ${HOSTNAME}
+          __path__: /var/log/vllm/*.log
+    
+    pipeline_stages:
+      # 타임스탬프 파싱
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05'
+      
+      # vLLM 요청 완료 로그 파싱
+      - regex:
+          expression: '.*Finished request (?P<request_id>\S+)'
+      
+      # 성능 메트릭 추출
+      - regex:
+          expression: '.*time_to_first_token[:\s]+(?P<ttft>[0-9.]+)'
+      - regex:
+          expression: '.*generation_time[:\s]+(?P<gen_time>[0-9.]+)'
+      - regex:
+          expression: '.*total_time[:\s]+(?P<total_time>[0-9.]+)'
+      - regex:
+          expression: '.*prompt_tokens[:\s]+(?P<prompt_tokens>[0-9]+)'
+      - regex:
+          expression: '.*completion_tokens[:\s]+(?P<completion_tokens>[0-9]+)'
+      
+      # 라벨 추가
+      - labels:
+          request_id:
+      
+      # Prometheus 메트릭 생성
+      - metrics:
+          vllm_ttft_seconds:
+            type: Gauge
+            description: "Time to first token per request"
+            source: ttft
+            config:
+              action: set
+          
+          vllm_generation_time_seconds:
+            type: Gauge
+            description: "Generation time per request"
+            source: gen_time
+            config:
+              action: set
+          
+          vllm_total_time_seconds:
+            type: Gauge
+            description: "Total request time"
+            source: total_time
+            config:
+              action: set
+          
+          vllm_prompt_tokens_count:
+            type: Gauge
+            description: "Prompt tokens per request"
+            source: prompt_tokens
+            config:
+              action: set
+          
+          vllm_completion_tokens_count:
+            type: Gauge
+            description: "Completion tokens per request"
+            source: completion_tokens
+            config:
+              action: set
+          
+          vllm_requests_total:
+            type: Counter
+            description: "Total number of requests"
+            config:
+              action: inc
