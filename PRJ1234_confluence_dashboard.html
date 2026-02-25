@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRJ1234 프로젝트 현황</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3347;
+    --text: #e2e8f0;
+    --text-muted: #7a8ba3;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.15);
+    --open: #10b981;
+    --open-bg: rgba(16,185,129,0.1);
+    --delayed: #f59e0b;
+    --delayed-bg: rgba(245,158,11,0.1);
+    --bug: #ef4444;
+    --bug-bg: rgba(239,68,68,0.1);
+    --done: #6366f1;
+    --done-bg: rgba(99,102,241,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px;
+    min-width: 900px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+  }
+  .header-left { display: flex; align-items: center; gap: 18px; }
+  .project-badge {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .project-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .project-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .header-meta strong { color: var(--text); font-weight: 500; display: block; font-size: 13px; margin-bottom: 4px; }
+
+  /* ── KPI Cards ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 10px 10px 0 0;
+  }
+  .kpi-card.green::before { background: var(--open); }
+  .kpi-card.amber::before { background: var(--delayed); }
+  .kpi-card.red::before { background: var(--bug); }
+  .kpi-card.purple::before { background: var(--done); }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-size: 30px;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── Epic Row ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .epic-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .epic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .epic-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .epic-key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .epic-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 4px 0 12px;
+  }
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .epic-stats {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .epic-stats span { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot.open { background: var(--open); }
+  .dot.delayed { background: var(--delayed); }
+  .dot.done { background: var(--done); }
+  .dot.bug { background: var(--bug); }
+
+  /* ── Stories Table ── */
+  .stories-section { margin-bottom: 28px; }
+  .story-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .story-table thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .story-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .story-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .story-table tbody tr:hover { background: var(--surface2); }
+  .story-table td { padding: 10px 14px; color: var(--text); vertical-align: middle; }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tag.story { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .tag.task  { background: rgba(59,130,246,0.12); color: #7dd3fc; }
+  .tag.bug   { background: var(--bug-bg); color: #fca5a5; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .status-badge.open    { background: var(--open-bg); color: #34d399; }
+  .status-badge.delayed { background: var(--delayed-bg); color: #fbbf24; }
+  .status-badge.done    { background: var(--done-bg); color: #a5b4fc; }
+  .status-badge.in-progress { background: rgba(59,130,246,0.12); color: #7dd3fc; }
+
+  .priority-high   { color: var(--bug); font-size: 11px; font-weight: 600; }
+  .priority-medium { color: var(--delayed); font-size: 11px; font-weight: 600; }
+  .priority-low    { color: var(--text-muted); font-size: 11px; font-weight: 600; }
+
+  .issue-key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  /* ── Assignee Section ── */
+  .assignee-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .assignee-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .assignee-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .av1 { background: rgba(59,130,246,0.25); color: #60a5fa; }
+  .av2 { background: rgba(16,185,129,0.25); color: #34d399; }
+  .av3 { background: rgba(245,158,11,0.25); color: #fbbf24; }
+  .av4 { background: rgba(99,102,241,0.25); color: #a5b4fc; }
+
+  .assignee-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .assignee-role {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .assignee-counters {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .mini-badge {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .mini-badge.open    { background: var(--open-bg); color: #34d399; }
+  .mini-badge.delayed { background: var(--delayed-bg); color: #fbbf24; }
+
+  .assignee-tasks { padding: 10px 0; }
+  .task-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 90px 80px;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-row:hover { background: var(--surface2); }
+  .task-desc { color: var(--text); line-height: 1.4; }
+  .task-due {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .task-due.overdue { color: var(--bug); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-left">
+    <div class="project-badge">PRJ1234</div>
+    <div>
+      <div class="project-title">AI 플랫폼 인프라 고도화 프로젝트</div>
+      <div class="project-subtitle">vLLM 서빙 인프라 모니터링 및 옵저버빌리티 구축</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <strong>최종 업데이트: 2025-02-25</strong>
+    Sprint 7 · Q1 2025<br>
+    과제원 4명 · Epic 2 · Stories 8
+  </div>
+</div>
+
+<!-- ── KPI Cards ── -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">전체 이슈</div>
+    <div class="kpi-value">34</div>
+    <div class="kpi-sub">Tasks + Bugs + Stories</div>
+  </div>
+  <div class="kpi-card green">
+    <div class="kpi-label">오픈 Task</div>
+    <div class="kpi-value" style="color:var(--open)">11</div>
+    <div class="kpi-sub">진행 중 · 대기 포함</div>
+  </div>
+  <div class="kpi-card amber">
+    <div class="kpi-label">지연 Task</div>
+    <div class="kpi-value" style="color:var(--delayed)">5</div>
+    <div class="kpi-sub">기한 초과 또는 임박</div>
+  </div>
+  <div class="kpi-card red">
+    <div class="kpi-label">오픈 Bug</div>
+    <div class="kpi-value" style="color:var(--bug)">3</div>
+    <div class="kpi-sub">P1: 1 · P2: 2</div>
+  </div>
+  <div class="kpi-card purple">
+    <div class="kpi-label">완료율</div>
+    <div class="kpi-value" style="color:var(--done)">62%</div>
+    <div class="kpi-sub">Stories 기준</div>
+  </div>
+</div>
+
+<!-- ── Epics ── -->
+<div class="section-title">Epics</div>
+<div class="epic-row">
+  <div class="epic-card">
+    <div class="epic-header">
+      <span class="epic-key">PRJ1234-EP1</span>
+      <span style="font-size:11px;color:var(--text-muted)">Stories 4/5 · 80%</span>
+    </div>
+    <div class="epic-name">모니터링 파이프라인 구축</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width:80%;background:linear-gradient(90deg,var(--open),#34d399)"></div>
+    </div>
+    <div class="epic-stats">
+      <span><span class="dot done"></span>완료 4</span>
+      <span><span class="dot open"></span>오픈 6</span>
+      <span><span class="dot delayed"></span>지연 2</span>
+      <span><span class="dot bug"></span>버그 1</span>
+    </div>
+  </div>
+  <div class="epic-card">
+    <div class="epic-header">
+      <span class="epic-key">PRJ1234-EP2</span>
+      <span style="font-size:11px;color:var(--text-muted)">Stories 1/3 · 33%</span>
+    </div>
+    <div class="epic-name">대시보드 및 알람 시스템 구축</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width:33%;background:linear-gradient(90deg,var(--delayed),#fbbf24)"></div>
+    </div>
+    <div class="epic-stats">
+      <span><span class="dot done"></span>완료 1</span>
+      <span><span class="dot open"></span>오픈 5</span>
+      <span><span class="dot delayed"></span>지연 3</span>
+      <span><span class="dot bug"></span>버그 2</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stories ── -->
+<div class="stories-section">
+  <div class="section-title">Stories / Tasks / Bugs 현황</div>
+  <table class="story-table">
+    <thead>
+      <tr>
+        <th>KEY</th>
+        <th>유형</th>
+        <th style="width:35%">제목</th>
+        <th>담당자</th>
+        <th>상태</th>
+        <th>우선순위</th>
+        <th>기한</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- EP1 -->
+      <tr>
+        <td><a class="issue-key">PRJ1234-101</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>Prometheus exporter 연동 및 메트릭 수집</td>
+        <td style="font-size:12px;">김서현</td>
+        <td><span class="status-badge done">● 완료</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due">02-10</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-102</a></td>
+        <td><span class="tag task">TASK</span></td>
+        <td>vLLM 커스텀 메트릭 레이블 정의</td>
+        <td style="font-size:12px;">김서현</td>
+        <td><span class="status-badge in-progress">● 진행중</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-20 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-103</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>Loki 로그 수집 파이프라인 구성</td>
+        <td style="font-size:12px;">이준혁</td>
+        <td><span class="status-badge done">● 완료</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due">02-15</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-104</a></td>
+        <td><span class="tag task">TASK</span></td>
+        <td>Promtail 에이전트 방화벽 우회 설정</td>
+        <td style="font-size:12px;">이준혁</td>
+        <td><span class="status-badge delayed">● 지연</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-18 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-105</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>API 요청별 상세 로그 구조화</td>
+        <td style="font-size:12px;">박민지</td>
+        <td><span class="status-badge in-progress">● 진행중</span></td>
+        <td class="priority-medium">MED</td>
+        <td class="task-due">02-28</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-106</a></td>
+        <td><span class="tag bug">BUG</span></td>
+        <td>Prometheus scrape 주기 누락 이슈</td>
+        <td style="font-size:12px;">박민지</td>
+        <td><span class="status-badge open">● 오픈</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-22 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-107</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>멀티모달 모델 요청 스키마 정의</td>
+        <td style="font-size:12px;">최다은</td>
+        <td><span class="status-badge done">● 완료</span></td>
+        <td class="priority-medium">MED</td>
+        <td class="task-due">02-12</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-108</a></td>
+        <td><span class="tag task">TASK</span></td>
+        <td>이미지 입력 토큰 계산 로직 검증</td>
+        <td style="font-size:12px;">최다은</td>
+        <td><span class="status-badge open">● 오픈</span></td>
+        <td class="priority-medium">MED</td>
+        <td class="task-due">03-05</td>
+      </tr>
+      <!-- EP2 -->
+      <tr>
+        <td><a class="issue-key">PRJ1234-201</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>Grafana 대시보드 변수 동적 구성</td>
+        <td style="font-size:12px;">김서현</td>
+        <td><span class="status-badge delayed">● 지연</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-19 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-202</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>알림 채널 연동 (Slack / PagerDuty)</td>
+        <td style="font-size:12px;">이준혁</td>
+        <td><span class="status-badge open">● 오픈</span></td>
+        <td class="priority-medium">MED</td>
+        <td class="task-due">03-08</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-203</a></td>
+        <td><span class="tag bug">BUG</span></td>
+        <td>Grafana 프록시 인증 오류 (407)</td>
+        <td style="font-size:12px;">이준혁</td>
+        <td><span class="status-badge open">● 오픈</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-21 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-204</a></td>
+        <td><span class="tag story">STORY</span></td>
+        <td>SLO/SLA 기반 임계치 정의 및 룰 작성</td>
+        <td style="font-size:12px;">박민지</td>
+        <td><span class="status-badge delayed">● 지연</span></td>
+        <td class="priority-high">HIGH</td>
+        <td class="task-due overdue">02-17 ⚠</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-205</a></td>
+        <td><span class="tag task">TASK</span></td>
+        <td>대시보드 패널 레이아웃 최종 확정</td>
+        <td style="font-size:12px;">최다은</td>
+        <td><span class="status-badge in-progress">● 진행중</span></td>
+        <td class="priority-low">LOW</td>
+        <td class="task-due">03-10</td>
+      </tr>
+      <tr>
+        <td><a class="issue-key">PRJ1234-206</a></td>
+        <td><span class="tag bug">BUG</span></td>
+        <td>대시보드 시간대 오프셋 표시 오류</td>
+        <td style="font-size:12px;">최다은</td>
+        <td><span class="status-badge delayed">● 지연</span></td>
+        <td class="priority-medium">MED</td>
+        <td class="task-due overdue">02-23 ⚠</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── Assignees ── -->
+<div class="section-title">과제원별 현황</div>
+<div class="assignee-grid">
+
+  <!-- 김서현 -->
+  <div class="assignee-card">
+    <div class="assignee-header">
+      <div class="avatar av1">김</div>
+      <div>
+        <div class="assignee-name">김서현</div>
+        <div class="assignee-role">Backend / Infra</div>
+      </div>
+      <div class="assignee-counters">
+        <span class="mini-badge open">오픈 2</span>
+        <span class="mini-badge delayed">지연 1</span>
+      </div>
+    </div>
+    <div class="assignee-tasks">
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-102</a></span>
+        <span class="task-desc">vLLM 커스텀 메트릭 레이블 정의 — scrape 설정 검토 필요</span>
+        <span class="status-badge in-progress" style="font-size:11px;">진행중</span>
+        <span class="task-due overdue">02-20 ⚠</span>
+      </div>
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-201</a></span>
+        <span class="task-desc">Grafana 대시보드 변수 동적 구성 — datasource 변수 연결 미완</span>
+        <span class="status-badge delayed" style="font-size:11px;">지연</span>
+        <span class="task-due overdue">02-19 ⚠</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이준혁 -->
+  <div class="assignee-card">
+    <div class="assignee-header">
+      <div class="avatar av2">이</div>
+      <div>
+        <div class="assignee-name">이준혁</div>
+        <div class="assignee-role">DevOps / Network</div>
+      </div>
+      <div class="assignee-counters">
+        <span class="mini-badge open">오픈 3</span>
+        <span class="mini-badge delayed">지연 2</span>
+      </div>
+    </div>
+    <div class="assignee-tasks">
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-104</a></span>
+        <span class="task-desc">Promtail 방화벽 우회 — 네트워크 ACL 요청 검토 중</span>
+        <span class="status-badge delayed" style="font-size:11px;">지연</span>
+        <span class="task-due overdue">02-18 ⚠</span>
+      </div>
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-203</a></span>
+        <span class="task-desc">Grafana 프록시 407 오류 — 인증 헤더 설정 수정 대기</span>
+        <span class="status-badge open" style="font-size:11px;">오픈</span>
+        <span class="task-due overdue">02-21 ⚠</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 박민지 -->
+  <div class="assignee-card">
+    <div class="assignee-header">
+      <div class="avatar av3">박</div>
+      <div>
+        <div class="assignee-name">박민지</div>
+        <div class="assignee-role">Observability / SRE</div>
+      </div>
+      <div class="assignee-counters">
+        <span class="mini-badge open">오픈 2</span>
+        <span class="mini-badge delayed">지연 1</span>
+      </div>
+    </div>
+    <div class="assignee-tasks">
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-106</a></span>
+        <span class="task-desc">Prometheus scrape 누락 버그 — interval 설정값 재검증 필요</span>
+        <span class="status-badge open" style="font-size:11px;">오픈</span>
+        <span class="task-due overdue">02-22 ⚠</span>
+      </div>
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-204</a></span>
+        <span class="task-desc">SLO 임계치 정의 — 서비스 오너 승인 대기 중</span>
+        <span class="status-badge delayed" style="font-size:11px;">지연</span>
+        <span class="task-due overdue">02-17 ⚠</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최다은 -->
+  <div class="assignee-card">
+    <div class="assignee-header">
+      <div class="avatar av4">최</div>
+      <div>
+        <div class="assignee-name">최다은</div>
+        <div class="assignee-role">ML Infra / Frontend</div>
+      </div>
+      <div class="assignee-counters">
+        <span class="mini-badge open">오픈 2</span>
+        <span class="mini-badge delayed">지연 1</span>
+      </div>
+    </div>
+    <div class="assignee-tasks">
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-108</a></span>
+        <span class="task-desc">멀티모달 이미지 토큰 계산 검증 — 테스트 케이스 작성 진행 중</span>
+        <span class="status-badge open" style="font-size:11px;">오픈</span>
+        <span class="task-due">03-05</span>
+      </div>
+      <div class="task-row">
+        <span><a class="issue-key">PRJ1234-206</a></span>
+        <span class="task-desc">대시보드 시간대 오프셋 버그 — KST 변환 로직 수정 필요</span>
+        <span class="status-badge delayed" style="font-size:11px;">지연</span>
+        <span class="task-due overdue">02-23 ⚠</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Footer ── -->
+<div class="footer">
+  <span>PRJ1234 · AI 플랫폼 인프라 고도화 · Sprint 7</span>
+  <span>⚠ 지연: 기한 초과 또는 2일 이내 · 데이터 기준일 2025-02-25</span>
+</div>
+
+</body>
+</html>
